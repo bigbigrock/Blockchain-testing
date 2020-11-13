@@ -5,7 +5,7 @@ import pytest
 from confest import cases_path,report_path,rerun,max_fail
 
 logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s-%(levelname)s-%(message)s',
+                    format='%(asctime)s-%(levelname)s-%(message)s'
                     )
 logger = logging.getLogger(__name__)
 

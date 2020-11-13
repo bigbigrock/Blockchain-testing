@@ -10,6 +10,9 @@ cases_path = BASE_DIR + "/test_cases"
 #测试报告目录
 report_path = BASE_DIR + "/test_report/"
 
+#接口数据
+date_path = BASE_DIR + "/test_data/"
+
 #失败重跑次数
 rerun = 3
 
@@ -17,4 +20,4 @@ rerun = 3
 max_fail = "5"
 
 #请求地址
-host = "http://123.56.170.101:8545"
+url = "http://123.56.170.101:8545"
