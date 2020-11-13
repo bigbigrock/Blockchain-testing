@@ -19,7 +19,7 @@ def init_env(now_time):
 
 def run():
     logger.info("测试开始执行》》》》》")
-    now_time = time.strftime("%Y-%m-%d-%H-%M-%S")
+    now_time = time.strftime("%Y-%m-%d-%H_%M_%S")
     init_env(now_time)
     html_report = os.path.join(report_path,now_time,'report.html')
     pytest.main(['-v',

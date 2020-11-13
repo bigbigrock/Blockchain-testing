@@ -1,0 +1,17 @@
+---
+tests:
+- case: 验证eth_sign 接口的正确性
+  http:
+    method: post
+    path:
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: eth_sign
+      params:
+         - "0xe2043a5B808bf2215D94e0934182E224a38A47D7"
+         - "0xdeadbeaf"
+  expected:
+    response:
+      id: 1
