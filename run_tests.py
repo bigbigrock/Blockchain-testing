@@ -10,23 +10,12 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 
-def init_env(now_time):
-    '''
-    初始化测试报告目录
-    '''
-    os.mkdir(report_path + now_time)
-    os.mkdir(report_path + now_time + "/image")
-
 def run():
     logger.info("测试开始执行》》》》》")
     now_time = time.strftime("%Y-%m-%d-%H_%M_%S")
-    init_env(now_time)
+    # init_env(now_time)
     html_report = os.path.join(report_path,now_time,'report.html')
-    pytest.main(['-v',
-                 cases_path,
-                 "--html=" + html_report,
-                 "--maxfail",max_fail,
-                 "--reruns",rerun])
+    pytest.main(['-v',cases_path,'--html='+html_report])
     logger.info("测试用例运行结束")
 
 if __name__ == '__main__':
