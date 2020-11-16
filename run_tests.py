@@ -9,7 +9,6 @@ logging.basicConfig(level=logging.INFO,
                     )
 logger = logging.getLogger(__name__)
 
-
 def run():
     logger.info("测试开始执行》》》》》")
     now_time = time.strftime("%Y-%m-%d-%H_%M_%S")
