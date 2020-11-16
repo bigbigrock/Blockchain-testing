@@ -1,6 +1,6 @@
 ---
 tests:
-- case: 验证eth_sign 接口的正确性
+- case: hhahahah
   http:
     method: post
     path:
