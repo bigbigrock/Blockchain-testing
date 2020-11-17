@@ -4,7 +4,7 @@ import yaml
 from confest import date_path,url,get_test_data
 import json
 
-cases,list_params = get_test_data(date_path + 'test_eth_sign')
+cases,list_params = get_test_data(date_path + 'test_eth_call')
 
 #请求返回响应结果
 class Test_sign(object):
@@ -18,7 +18,4 @@ class Test_sign(object):
         )
         response = r.json() #返回字典格式
         print(response)
-        assert response['result'] != None,"响应结果为：{}".format(response)
-
-
-
+        assert response['result'] != None ,"响应结果为：{}".format(response)

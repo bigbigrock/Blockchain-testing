@@ -4,7 +4,7 @@ import yaml
 from confest import date_path,url,get_test_data
 import json
 
-cases,list_params = get_test_data(date_path + 'test_eth_sign')
+cases,list_params = get_test_data(date_path + 'test_eth_getcode')
 
 #请求返回响应结果
 class Test_sign(object):

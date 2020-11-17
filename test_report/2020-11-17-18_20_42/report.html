@@ -251,7 +251,7 @@ function filter_table(elem) { // eslint-disable-line no-unused-vars
 }
 </script>
     <h1>report.html</h1>
-    <p>Report generated on 16-Nov-2020 at 18:21:02 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.0.0</p>
+    <p>Report generated on 17-Nov-2020 at 18:20:43 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.0.0</p>
     <h2>Environment</h2>
     <table id="environment">
       <tr>
@@ -270,8 +270,8 @@ function filter_table(elem) { // eslint-disable-line no-unused-vars
         <td>Python</td>
         <td>3.8.0</td></tr></table>
     <h2>Summary</h2>
-    <p>2 tests ran in 0.36 seconds. </p>
-    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="passed">2 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="failed">0 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <p>3 tests ran in 0.31 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="passed">1 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="failed">2 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
     <h2>Results</h2>
     <table id="results-table">
       <thead id="results-table-head">
@@ -282,21 +282,33 @@ function filter_table(elem) { // eslint-disable-line no-unused-vars
           <th class="sortable links" col="links">Links</th></tr>
         <tr hidden="true" id="not-found-message">
           <th colspan="4">No results found. Try to check the filters</th></tr></thead>
-      <tbody class="passed results-table-row">
+      <tbody class="failed results-table-row">
         <tr>
-          <td class="col-result">Passed</td>
-          <td class="col-name">test_cases/test_eth_sign.py::Test_Sign::test_sign[hhahahah]</td>
-          <td class="col-duration">0.07</td>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cases/test_eth_getcode.py::Test_sign::test_sign[测试eth_getcode接口的正确性]</td>
+          <td class="col-duration">0.03</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="empty log">No log output captured.</div></td></tr></tbody>
-      <tbody class="passed results-table-row">
+            <div class="log">self = &lt;test_eth_getcode.Test_sign object at 0x0000017DDC789550&gt;<br/>case = &#x27;测试eth_getcode接口的正确性&#x27;<br/>http = {&#x27;data&#x27;: {&#x27;id&#x27;: 1, &#x27;json&#x27;: 2.0, &#x27;method&#x27;: &#x27;eth_getCode&#x27;, &#x27;params&#x27;: [&#x27;0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2&#x27;, &#x27;0x0...21c53a4e8687c2d67a4f38e414e08afeb0&#x27;]}, &#x27;headers&#x27;: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}, &#x27;method&#x27;: &#x27;post&#x27;, &#x27;path&#x27;: None}<br/>expected = &#x27;expected&#x27;<br/><br/>    @pytest.mark.parametrize(&quot;case,http,expected&quot;,list(list_params),ids=cases)<br/>    def test_sign(self,case,http,expected):<br/>        r= requests.request(<br/>            http[&quot;method&quot;],<br/>            url=url,<br/>            headers=http[&quot;headers&quot;],<br/>            data=json.dumps(http[&#x27;data&#x27;])<br/>        )<br/>        response = r.json() #返回字典格式<br/>        print(response)<br/>&gt;       assert response[&#x27;result&#x27;] != None,&quot;响应结果为：{}&quot;.format(response)<br/><span class="error">E       KeyError: &#x27;result&#x27;</span><br/><br/>test_cases\test_eth_getcode.py:21: KeyError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;error&#x27;: {&#x27;code&#x27;: -32602, &#x27;message&#x27;: &#x27;invalid argument 1: hex number with leading zero digits&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
         <tr>
-          <td class="col-result">Passed</td>
-          <td class="col-name">test_cases/test_eth_sign.py::Test_Sign::test_sign[验证eth_sign 接口的cuowi性]</td>
-          <td class="col-duration">0.04</td>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cases/test_eth_sign.py::Test_sign::test_sign[测试eth_sign接口的正确性]</td>
+          <td class="col-duration">0.02</td>
           <td class="col-links"></td></tr>
         <tr>
           <td class="extra" colspan="4">
-            <div class="empty log">No log output captured.</div></td></tr></tbody></table></body></html>
+            <div class="log">self = &lt;test_eth_sign.Test_sign object at 0x0000017DDC7CF3A0&gt;<br/>case = &#x27;测试eth_sign接口的正确性&#x27;<br/>http = {&#x27;data&#x27;: {&#x27;id&#x27;: 1, &#x27;json&#x27;: 2.0, &#x27;method&#x27;: &#x27;eth_sign&#x27;, &#x27;params&#x27;: [&#x27;0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2&#x27;, &#x27;0xdeadeaf&#x27;]}, &#x27;headers&#x27;: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}, &#x27;method&#x27;: &#x27;post&#x27;}<br/>expected = &#x27;expected&#x27;<br/><br/>    @pytest.mark.parametrize(&quot;case,http,expected&quot;,list(list_params),ids=cases)<br/>    def test_sign(self,case,http,expected):<br/>        r= requests.request(<br/>            http[&quot;method&quot;],<br/>            url=url,<br/>            headers=http[&quot;headers&quot;],<br/>            data=json.dumps(http[&#x27;data&#x27;])<br/>        )<br/>        response = r.json() #返回字典格式<br/>        print(response)<br/>&gt;       assert response[&#x27;result&#x27;] != None,&quot;响应结果为：{}&quot;.format(response)<br/><span class="error">E       KeyError: &#x27;result&#x27;</span><br/><br/>test_cases\test_eth_sign.py:21: KeyError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;error&#x27;: {&#x27;code&#x27;: -32602, &#x27;message&#x27;: &#x27;invalid argument 1: json: cannot unmarshal hex string of odd length into Go value of type hexutil.Bytes&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_call.py::Test_sign::test_sign[测试eth_call接口的正确性]</td>
+          <td class="col-duration">0.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000548656c6c6f000000000000000000000000000000000000000000000000000000&#x27;}
+<br/></div></td></tr></tbody></table></body></html>

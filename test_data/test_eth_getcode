@@ -1,0 +1,18 @@
+---
+tests:
+- case: 测试eth_getcode接口的正确性
+  http:
+    method: post
+    path:
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: eth_getCode
+      params:
+        - "0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2"
+        - "0x09884521c53a4e8687c2d67a4f38e414e08afeb0"
+      id: 1
+  expected:
+    respon:
+      id: 1

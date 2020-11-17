@@ -1,33 +1,16 @@
 ---
 tests:
-- case: hhahahah
+- case: 测试eth_sign接口的正确性
   http:
     method: post
-    path:
     headers:
       Content-Type: application/json
     data:
       json: 2.0
       method: eth_sign
       params:
-         - "0xe2043a5B808bf2215D94e0934182E224a38A47D7"
-         - "0xdeadbeaf"
-      id: 1
-  expected:
-    respon:
-      id: 1
-- case: 验证eth_sign 接口的cuowi性
-  http:
-    method: post
-    path:
-    headers:
-      Content-Type: application/json
-    data:
-      json: 2.0
-      method: eth_sign
-      params:
-         - "0xe2043a5B808bf2215D94e0934182E224a38A47D7"
-         - "0xdeadbeaf"
+         - "0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2"
+         - "0xdeadeaf"
       id: 1
   expected:
     respon:
