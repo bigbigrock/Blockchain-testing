@@ -1,17 +1,15 @@
 ---
 tests:
-- case: 测试eth_getcode接口的正确性
+- case: 测试web3_sha3接口的正确性
   http:
     method: post
-    path:
     headers:
       Content-Type: application/json
     data:
       json: 2.0
-      method: eth_getCode
+      method: web3_sha3
       params:
-        - "0x09884521c53a4e8687c2d67a4f38e414e08afeb0"
-        - "0x2"
+        - "0x1110"
       id: 1
   expected:
     respon:

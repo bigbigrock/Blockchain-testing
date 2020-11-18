@@ -1,0 +1,15 @@
+---
+tests:
+- case: 测试web3_clientVersion接口的正确性
+  http:
+    method: post
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: web3_clientVersion
+      params: []
+      id: 1
+  expected:
+    respon:
+      id: 1

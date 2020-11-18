@@ -7,7 +7,7 @@ import json
 cases,list_params = get_test_data(date_path + 'test_eth_sign')
 
 #请求返回响应结果
-class Test_sign(object):
+class Test_eth(object):
     @pytest.mark.parametrize("case,http,expected",list(list_params),ids=cases)
     def test_sign(self,case,http,expected):
         r= requests.request(

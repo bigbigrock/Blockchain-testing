@@ -1,0 +1,16 @@
+---
+tests:
+- case: 测试eth_getTransactionByHash接口的正确性
+  http:
+    method: post
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: eth_getTransactionByHash
+      params:
+        - "0x0f06c9ef36373d4c703f499e5ed91b77368513aa5a9005d1a3b3692b5b02f906"
+      id: 1
+  expected:
+    respon:
+      id: 1

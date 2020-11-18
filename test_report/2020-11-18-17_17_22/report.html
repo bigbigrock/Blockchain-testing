@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Test Report</title>
+    <link href="assets/style.css" rel="stylesheet" type="text/css"/></head>
+  <body onLoad="init()">
+    <script>/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+function toArray(iter) {
+    if (iter === null) {
+        return null;
+    }
+    return Array.prototype.slice.call(iter);
+}
+
+function find(selector, elem) { // eslint-disable-line no-redeclare
+    if (!elem) {
+        elem = document;
+    }
+    return elem.querySelector(selector);
+}
+
+function find_all(selector, elem) {
+    if (!elem) {
+        elem = document;
+    }
+    return toArray(elem.querySelectorAll(selector));
+}
+
+function sort_column(elem) {
+    toggle_sort_states(elem);
+    const colIndex = toArray(elem.parentNode.childNodes).indexOf(elem);
+    let key;
+    if (elem.classList.contains('numeric')) {
+        key = key_num;
+    } else if (elem.classList.contains('result')) {
+        key = key_result;
+    } else if (elem.classList.contains('links')) {
+        key = key_link;
+    } else {
+        key = key_alpha;
+    }
+    sort_table(elem, key(colIndex));
+}
+
+function show_all_extras() { // eslint-disable-line no-unused-vars
+    find_all('.col-result').forEach(show_extras);
+}
+
+function hide_all_extras() { // eslint-disable-line no-unused-vars
+    find_all('.col-result').forEach(hide_extras);
+}
+
+function show_extras(colresult_elem) {
+    const extras = colresult_elem.parentNode.nextElementSibling;
+    const expandcollapse = colresult_elem.firstElementChild;
+    extras.classList.remove('collapsed');
+    expandcollapse.classList.remove('expander');
+    expandcollapse.classList.add('collapser');
+}
+
+function hide_extras(colresult_elem) {
+    const extras = colresult_elem.parentNode.nextElementSibling;
+    const expandcollapse = colresult_elem.firstElementChild;
+    extras.classList.add('collapsed');
+    expandcollapse.classList.remove('collapser');
+    expandcollapse.classList.add('expander');
+}
+
+function show_filters() {
+    const filter_items = document.getElementsByClassName('filter');
+    for (let i = 0; i < filter_items.length; i++)
+        filter_items[i].hidden = false;
+}
+
+function add_collapse() {
+    // Add links for show/hide all
+    const resulttable = find('table#results-table');
+    const showhideall = document.createElement('p');
+    showhideall.innerHTML = '<a href="javascript:show_all_extras()">Show all details</a> / ' +
+                            '<a href="javascript:hide_all_extras()">Hide all details</a>';
+    resulttable.parentElement.insertBefore(showhideall, resulttable);
+
+    // Add show/hide link to each result
+    find_all('.col-result').forEach(function(elem) {
+        const collapsed = get_query_parameter('collapsed') || 'Passed';
+        const extras = elem.parentNode.nextElementSibling;
+        const expandcollapse = document.createElement('span');
+        if (extras.classList.contains('collapsed')) {
+            expandcollapse.classList.add('expander');
+        } else if (collapsed.includes(elem.innerHTML)) {
+            extras.classList.add('collapsed');
+            expandcollapse.classList.add('expander');
+        } else {
+            expandcollapse.classList.add('collapser');
+        }
+        elem.appendChild(expandcollapse);
+
+        elem.addEventListener('click', function(event) {
+            if (event.currentTarget.parentNode.nextElementSibling.classList.contains('collapsed')) {
+                show_extras(event.currentTarget);
+            } else {
+                hide_extras(event.currentTarget);
+            }
+        });
+    });
+}
+
+function get_query_parameter(name) {
+    const match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+}
+
+function init () { // eslint-disable-line no-unused-vars
+    reset_sort_headers();
+
+    add_collapse();
+
+    show_filters();
+
+    sort_column(find('.initial-sort'));
+
+    find_all('.sortable').forEach(function(elem) {
+        elem.addEventListener('click',
+            function() {
+                sort_column(elem);
+            }, false);
+    });
+}
+
+function sort_table(clicked, key_func) {
+    const rows = find_all('.results-table-row');
+    const reversed = !clicked.classList.contains('asc');
+    const sorted_rows = sort(rows, key_func, reversed);
+    /* Whole table is removed here because browsers acts much slower
+     * when appending existing elements.
+     */
+    const thead = document.getElementById('results-table-head');
+    document.getElementById('results-table').remove();
+    const parent = document.createElement('table');
+    parent.id = 'results-table';
+    parent.appendChild(thead);
+    sorted_rows.forEach(function(elem) {
+        parent.appendChild(elem);
+    });
+    document.getElementsByTagName('BODY')[0].appendChild(parent);
+}
+
+function sort(items, key_func, reversed) {
+    const sort_array = items.map(function(item, i) {
+        return [key_func(item), i];
+    });
+
+    sort_array.sort(function(a, b) {
+        const key_a = a[0];
+        const key_b = b[0];
+
+        if (key_a == key_b) return 0;
+
+        if (reversed) {
+            return key_a < key_b ? 1 : -1;
+        } else {
+            return key_a > key_b ? 1 : -1;
+        }
+    });
+
+    return sort_array.map(function(item) {
+        const index = item[1];
+        return items[index];
+    });
+}
+
+function key_alpha(col_index) {
+    return function(elem) {
+        return elem.childNodes[1].childNodes[col_index].firstChild.data.toLowerCase();
+    };
+}
+
+function key_num(col_index) {
+    return function(elem) {
+        return parseFloat(elem.childNodes[1].childNodes[col_index].firstChild.data);
+    };
+}
+
+function key_link(col_index) {
+    return function(elem) {
+        const dataCell = elem.childNodes[1].childNodes[col_index].firstChild;
+        return dataCell == null ? '' : dataCell.innerText.toLowerCase();
+    };
+}
+
+function key_result(col_index) {
+    return function(elem) {
+        const strings = ['Error', 'Failed', 'Rerun', 'XFailed', 'XPassed',
+            'Skipped', 'Passed'];
+        return strings.indexOf(elem.childNodes[1].childNodes[col_index].firstChild.data);
+    };
+}
+
+function reset_sort_headers() {
+    find_all('.sort-icon').forEach(function(elem) {
+        elem.parentNode.removeChild(elem);
+    });
+    find_all('.sortable').forEach(function(elem) {
+        const icon = document.createElement('div');
+        icon.className = 'sort-icon';
+        icon.textContent = 'vvv';
+        elem.insertBefore(icon, elem.firstChild);
+        elem.classList.remove('desc', 'active');
+        elem.classList.add('asc', 'inactive');
+    });
+}
+
+function toggle_sort_states(elem) {
+    //if active, toggle between asc and desc
+    if (elem.classList.contains('active')) {
+        elem.classList.toggle('asc');
+        elem.classList.toggle('desc');
+    }
+
+    //if inactive, reset all other functions and add ascending active
+    if (elem.classList.contains('inactive')) {
+        reset_sort_headers();
+        elem.classList.remove('inactive');
+        elem.classList.add('active');
+    }
+}
+
+function is_all_rows_hidden(value) {
+    return value.hidden == false;
+}
+
+function filter_table(elem) { // eslint-disable-line no-unused-vars
+    const outcome_att = 'data-test-result';
+    const outcome = elem.getAttribute(outcome_att);
+    const class_outcome = outcome + ' results-table-row';
+    const outcome_rows = document.getElementsByClassName(class_outcome);
+
+    for(let i = 0; i < outcome_rows.length; i++){
+        outcome_rows[i].hidden = !elem.checked;
+    }
+
+    const rows = find_all('.results-table-row').filter(is_all_rows_hidden);
+    const all_rows_hidden = rows.length == 0 ? true : false;
+    const not_found_message = document.getElementById('not-found-message');
+    not_found_message.hidden = !all_rows_hidden;
+}
+</script>
+    <h1>report.html</h1>
+    <p>Report generated on 18-Nov-2020 at 17:17:25 by <a href="https://pypi.python.org/pypi/pytest-html">pytest-html</a> v3.0.0</p>
+    <h2>Environment</h2>
+    <table id="environment">
+      <tr>
+        <td>JAVA_HOME</td>
+        <td>D:\Program Files\Java\jdk1.8.0_101</td></tr>
+      <tr>
+        <td>Packages</td>
+        <td>{"pluggy": "0.13.1", "py": "1.9.0", "pytest": "6.1.2"}</td></tr>
+      <tr>
+        <td>Platform</td>
+        <td>Windows-10-10.0.18362-SP0</td></tr>
+      <tr>
+        <td>Plugins</td>
+        <td>{"html": "3.0.0", "metadata": "1.10.0"}</td></tr>
+      <tr>
+        <td>Python</td>
+        <td>3.8.0</td></tr></table>
+    <h2>Summary</h2>
+    <p>22 tests ran in 2.53 seconds. </p>
+    <p class="filter" hidden="true">(Un)check the boxes to filter the results.</p><input checked="true" class="filter" data-test-result="passed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="passed">19 passed</span>, <input checked="true" class="filter" data-test-result="skipped" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="skipped">0 skipped</span>, <input checked="true" class="filter" data-test-result="failed" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="failed">3 failed</span>, <input checked="true" class="filter" data-test-result="error" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="error">0 errors</span>, <input checked="true" class="filter" data-test-result="xfailed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xfailed">0 expected failures</span>, <input checked="true" class="filter" data-test-result="xpassed" disabled="true" hidden="true" name="filter_checkbox" onChange="filter_table(this)" type="checkbox"/><span class="xpassed">0 unexpected passes</span>
+    <h2>Results</h2>
+    <table id="results-table">
+      <thead id="results-table-head">
+        <tr>
+          <th class="sortable result initial-sort" col="result">Result</th>
+          <th class="sortable" col="name">Test</th>
+          <th class="sortable numeric" col="duration">Duration</th>
+          <th class="sortable links" col="links">Links</th></tr>
+        <tr hidden="true" id="not-found-message">
+          <th colspan="4">No results found. Try to check the filters</th></tr></thead>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cases/test_eth_getTransactionByBlockHashAndIndex.py::Test_eth::test_sign[测试eth_getTransactionByBlockHashAndIndex接口的正确性]</td>
+          <td class="col-duration">0.03</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_eth_getTransactionByBlockHashAndIndex.Test_eth object at 0x0000025EF0FA8C10&gt;<br/>case = &#x27;测试eth_getTransactionByBlockHashAndIndex接口的正确性&#x27;<br/>http = {&#x27;data&#x27;: {&#x27;id&#x27;: 1, &#x27;json&#x27;: 2.0, &#x27;method&#x27;: &#x27;eth_getTransactionByBlockHashAndIndex&#x27;, &#x27;params&#x27;: [&#x27;0x7e90d041513ce3eb12adf33a1e4c904ee7b7f21d97c432a94c3f363ddf83d272&#x27;, &#x27;0x0&#x27;]}, &#x27;headers&#x27;: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}, &#x27;method&#x27;: &#x27;post&#x27;}<br/>expected = &#x27;expected&#x27;<br/><br/>    @pytest.mark.parametrize(&quot;case,http,expected&quot;,list(list_params),ids=cases)<br/>    def test_sign(self,case,http,expected):<br/>        r= requests.request(<br/>            http[&quot;method&quot;],<br/>            url=url,<br/>            headers=http[&quot;headers&quot;],<br/>            data=json.dumps(http[&#x27;data&#x27;])<br/>        )<br/>        response = r.json() #返回字典格式<br/>        print(response)<br/>&gt;       assert response[&#x27;result&#x27;] != None ,&quot;响应结果为：{}&quot;.format(response)<br/><span class="error">E       AssertionError: 响应结果为：{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: None}</span><br/><span class="error">E       assert None != None</span><br/><br/>test_cases\test_eth_getTransactionByBlockHashAndIndex.py:21: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: None}
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cases/test_eth_getTransactionByBlockNumberAndIndex.py::Test_eth::test_sign[测试eth_getTransactionByBlockNumberAndIndex接口的正确性]</td>
+          <td class="col-duration">0.08</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_eth_getTransactionByBlockNumberAndIndex.Test_eth object at 0x0000025EF0FCF940&gt;<br/>case = &#x27;测试eth_getTransactionByBlockNumberAndIndex接口的正确性&#x27;<br/>http = {&#x27;data&#x27;: {&#x27;id&#x27;: 1, &#x27;json&#x27;: 2.0, &#x27;method&#x27;: &#x27;eth_getTransactionByBlockNumberAndIndex&#x27;, &#x27;params&#x27;: [&#x27;0x1&#x27;, &#x27;0x0&#x27;]}, &#x27;headers&#x27;: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}, &#x27;method&#x27;: &#x27;post&#x27;}<br/>expected = &#x27;expected&#x27;<br/><br/>    @pytest.mark.parametrize(&quot;case,http,expected&quot;,list(list_params),ids=cases)<br/>    def test_sign(self,case,http,expected):<br/>        r= requests.request(<br/>            http[&quot;method&quot;],<br/>            url=url,<br/>            headers=http[&quot;headers&quot;],<br/>            data=json.dumps(http[&#x27;data&#x27;])<br/>        )<br/>        response = r.json() #返回字典格式<br/>        print(response)<br/>&gt;       assert response[&#x27;result&#x27;] != None ,&quot;响应结果为：{}&quot;.format(response)<br/><span class="error">E       AssertionError: 响应结果为：{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: None}</span><br/><span class="error">E       assert None != None</span><br/><br/>test_cases\test_eth_getTransactionByBlockNumberAndIndex.py:21: AssertionError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: None}
+<br/></div></td></tr></tbody>
+      <tbody class="failed results-table-row">
+        <tr>
+          <td class="col-result">Failed</td>
+          <td class="col-name">test_cases/test_eth_sign.py::Test_eth::test_sign[测试eth_sign接口的正确性]</td>
+          <td class="col-duration">0.17</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log">self = &lt;test_eth_sign.Test_eth object at 0x0000025EF1029490&gt;<br/>case = &#x27;测试eth_sign接口的正确性&#x27;<br/>http = {&#x27;data&#x27;: {&#x27;id&#x27;: 1, &#x27;json&#x27;: 2.0, &#x27;method&#x27;: &#x27;eth_sign&#x27;, &#x27;params&#x27;: [&#x27;0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2&#x27;, &#x27;0xdeadeaf&#x27;]}, &#x27;headers&#x27;: {&#x27;Content-Type&#x27;: &#x27;application/json&#x27;}, &#x27;method&#x27;: &#x27;post&#x27;}<br/>expected = &#x27;expected&#x27;<br/><br/>    @pytest.mark.parametrize(&quot;case,http,expected&quot;,list(list_params),ids=cases)<br/>    def test_sign(self,case,http,expected):<br/>        r= requests.request(<br/>            http[&quot;method&quot;],<br/>            url=url,<br/>            headers=http[&quot;headers&quot;],<br/>            data=json.dumps(http[&#x27;data&#x27;])<br/>        )<br/>        response = r.json() #返回字典格式<br/>        print(response)<br/>&gt;       assert response[&#x27;result&#x27;] != None,&quot;响应结果为：{}&quot;.format(response)<br/><span class="error">E       KeyError: &#x27;result&#x27;</span><br/><br/>test_cases\test_eth_sign.py:21: KeyError<br/> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;error&#x27;: {&#x27;code&#x27;: -32602, &#x27;message&#x27;: &#x27;invalid argument 1: json: cannot unmarshal hex string of odd length into Go value of type hexutil.Bytes&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_account.py::Test_eth::test_sign[测试eth_accounts接口的正确性]</td>
+          <td class="col-duration">0.12</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 67, &#x27;result&#x27;: [&#x27;0xe0df5ba2c23b2eddcab7df15255f12474680b8e2&#x27;, &#x27;0x474b5eedfe398398c04e26082102c7bddc6beb5d&#x27;]}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_blocknumber.py::Test_eth::test_sign[测试eth_blockNumber接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 67, &#x27;result&#x27;: &#x27;0xbe44e&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_call.py::Test_eth::test_sign[测试eth_call接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000548656c6c6f000000000000000000000000000000000000000000000000000000&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_estimategas.py::Test_eth::test_sign[测试eth_estimateGas接口的正确性]</td>
+          <td class="col-duration">0.13</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x989680&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_gasprice.py::Test_eth::test_sign[测试eth_gasprice接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 67, &#x27;result&#x27;: &#x27;0x14&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getTransactionreceipt.py::Test_eth::test_sign[测试eth_getTransactionReceipt接口的正确性]</td>
+          <td class="col-duration">0.08</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: {&#x27;blockHash&#x27;: &#x27;0xcfea9595600447aa74933130ae22bddd547a24e114b0ddeea1ed5e934f1351ef&#x27;, &#x27;blockNumber&#x27;: &#x27;0x171f8&#x27;, &#x27;contractAddress&#x27;: None, &#x27;cumulativeGasUsed&#x27;: None, &#x27;from&#x27;: &#x27;0xe0df5ba2c23b2eddcab7df15255f12474680b8e2&#x27;, &#x27;gasUsed&#x27;: &#x27;0x87c6&#x27;, &#x27;logs&#x27;: None, &#x27;logsBloom&#x27;: &#x27;0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&#x27;, &#x27;status&#x27;: &#x27;0x1&#x27;, &#x27;to&#x27;: &#x27;0x474b5eedfe398398c04e26082102c7bddc6beb5d&#x27;, &#x27;transactionHash&#x27;: &#x27;0x0f06c9ef36373d4c703f499e5ed91b77368513aa5a9005d1a3b3692b5b02f906&#x27;, &#x27;transactionIndex&#x27;: &#x27;0x0&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getbalance.py::Test_eth::test_sign[测试eth_getBalance接口的正确性]</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x52b7d2dcc5c6bb4748bdc0&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getblockbyhash.py::Test_eth::test_sign[测试eth_getBlockByHash接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 67, &#x27;result&#x27;: {&#x27;difficulty&#x27;: None, &#x27;extraData&#x27;: None, &#x27;gasLimit&#x27;: &#x27;0xffffffff&#x27;, &#x27;gasUsed&#x27;: None, &#x27;hash&#x27;: &#x27;0x7e90d041513ce3eb12adf33a1e4c904ee7b7f21d97c432a94c3f363ddf83d272&#x27;, &#x27;logsBloom&#x27;: &#x27;0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&#x27;, &#x27;miner&#x27;: &#x27;0x0000000000000000000000000000000000000000&#x27;, &#x27;nonce&#x27;: None, &#x27;number&#x27;: &#x27;0x1&#x27;, &#x27;sha3Uncles&#x27;: None, &#x27;size&#x27;: &#x27;0x15b&#x27;, &#x27;stateRoot&#x27;: &#x27;0x&#x27;, &#x27;totalDifficulty&#x27;: None, &#x27;transactions&#x27;: [], &#x27;transactionsRoot&#x27;: &#x27;0x&#x27;, &#x27;uncles&#x27;: None}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getblockbynumber.py::Test_eth::test_sign[测试eth_getBlockByNumber接口的正确性]</td>
+          <td class="col-duration">0.06</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: {&#x27;difficulty&#x27;: None, &#x27;extraData&#x27;: None, &#x27;gasLimit&#x27;: &#x27;0xffffffff&#x27;, &#x27;gasUsed&#x27;: None, &#x27;hash&#x27;: &#x27;0x423080d3239119babc479641dfbddaface011d0788b0321246ebb5bae017de62&#x27;, &#x27;logsBloom&#x27;: &#x27;0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&#x27;, &#x27;miner&#x27;: &#x27;0x0000000000000000000000000000000000000000&#x27;, &#x27;nonce&#x27;: None, &#x27;number&#x27;: &#x27;0x4537&#x27;, &#x27;sha3Uncles&#x27;: None, &#x27;size&#x27;: &#x27;0x1a4&#x27;, &#x27;stateRoot&#x27;: &#x27;0x1c6f1ef2b702d5cc6275456c82c60db274dfbfac2d5c8e6aab54069ef53808ba&#x27;, &#x27;totalDifficulty&#x27;: None, &#x27;transactions&#x27;: [], &#x27;transactionsRoot&#x27;: &#x27;0x&#x27;, &#x27;uncles&#x27;: None}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getcode.py::Test_eth::test_sign[测试eth_getcode接口的正确性]</td>
+          <td class="col-duration">0.07</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_getstorageat.py::Test_eth::test_sign[测试eth_getStorageAt接口的正确性]</td>
+          <td class="col-duration">0.39</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x000000000000000000000000000000000000000000000000000000000000302e&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_gettansactionbyhash.py::Test_eth::test_sign[测试eth_getTransactionByHash接口的正确性]</td>
+          <td class="col-duration">0.25</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: {&#x27;blockHash&#x27;: &#x27;0xcfea9595600447aa74933130ae22bddd547a24e114b0ddeea1ed5e934f1351ef&#x27;, &#x27;blockNumber&#x27;: &#x27;0x171f8&#x27;, &#x27;from&#x27;: &#x27;0xe0df5ba2c23b2eddcab7df15255f12474680b8e2&#x27;, &#x27;gas&#x27;: &#x27;0x10000&#x27;, &#x27;gasPrice&#x27;: &#x27;0x14&#x27;, &#x27;hash&#x27;: &#x27;0x21ee3fb2a3cc95925b477a6c2ee1447fec46ca0135cf9de86f2721efdac34de0&#x27;, &#x27;input&#x27;: &#x27;0x&#x27;, &#x27;nonce&#x27;: &#x27;0x2b&#x27;, &#x27;to&#x27;: &#x27;0x474b5eedfe398398c04e26082102c7bddc6beb5d&#x27;, &#x27;transactionIndex&#x27;: &#x27;0x0&#x27;, &#x27;value&#x27;: &#x27;0x10000000&#x27;, &#x27;v&#x27;: &#x27;0x4594&#x27;, &#x27;r&#x27;: &#x27;0xb5a44dfd8d60f23cc5263dc0230f84e7a30d62309a8cfd653fd8209c5d1df262&#x27;, &#x27;s&#x27;: &#x27;0x4698153fefd2064a1758707261f9b433a24205951eb5dd312c19c462e2cee110&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_gettransactioncount.py::Test_eth::test_sign[测试eth_getTransactionCount接口的正确性]</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x1&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_sendrawtransaction.py::Test_eth::test_sign[测试eth_signTransaction接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: {&#x27;raw&#x27;: &#x27;0xf86b01849184e72a8301000094474b5eedfe398398c04e26082102c7bddc6beb5d85010000000080824593a02da53d35ec67d6d9fbce29ad505e1b25c8680bfbb0b244ad1aa7a5298d2b6674a01f5187c5db3dad94d9abc461dca1b5f5251c29ab9ec8f05b25b7021c8bc513b3&#x27;}}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_sendtransaction.py::Test_eth::test_sign[测试eth_sendTransaction接口的正确性]</td>
+          <td class="col-duration">0.06</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x3e73c88bce76be9f7536b4e0bdfe50e149170e635eb2942d93fc5e06ec290f6b&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_eth_syncing.py::Test_eth::test_sign[测试eth_syncing接口的正确性]</td>
+          <td class="col-duration">0.15</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 67, &#x27;result&#x27;: False}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_net_version.py::Test_eth::test_sign[测试net_version接口的正确性]</td>
+          <td class="col-duration">0.06</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;8888&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_web3_clientVersion.py::Test_eth::test_sign[测试web3_clientVersion接口的正确性]</td>
+          <td class="col-duration">0.04</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;Hashrs/0.0.0+/linux/go1.14.6&#x27;}
+<br/></div></td></tr></tbody>
+      <tbody class="passed results-table-row">
+        <tr>
+          <td class="col-result">Passed</td>
+          <td class="col-name">test_cases/test_web3_sha3.py::Test_eth::test_sign[测试web3_sha3接口的正确性]</td>
+          <td class="col-duration">0.05</td>
+          <td class="col-links"></td></tr>
+        <tr>
+          <td class="extra" colspan="4">
+            <div class="log"> ------------------------------Captured stdout call------------------------------ <br/>{&#x27;jsonrpc&#x27;: &#x27;2.0&#x27;, &#x27;id&#x27;: 1, &#x27;result&#x27;: &#x27;0x530251172ce42b2513469a161abc776cb4b0853d298810cf3e7cd27402d1ab2a&#x27;}
+<br/></div></td></tr></tbody></table></body></html>

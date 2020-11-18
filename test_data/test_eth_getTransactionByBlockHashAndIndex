@@ -1,0 +1,17 @@
+---
+tests:
+- case: 测试eth_getTransactionByBlockHashAndIndex接口的正确性
+  http:
+    method: post
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: eth_getTransactionByBlockHashAndIndex
+      params:
+        - "0x7e90d041513ce3eb12adf33a1e4c904ee7b7f21d97c432a94c3f363ddf83d272"
+        - "0x0"
+      id: 1
+  expected:
+    respon:
+      id: 1

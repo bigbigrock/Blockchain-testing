@@ -1,17 +1,17 @@
 ---
 tests:
-- case: 测试eth_getcode接口的正确性
+- case: 测试eth_getStorageAt接口的正确性
   http:
     method: post
-    path:
     headers:
       Content-Type: application/json
     data:
       json: 2.0
-      method: eth_getCode
+      method: eth_getStorageAt
       params:
-        - "0x09884521c53a4e8687c2d67a4f38e414e08afeb0"
-        - "0x2"
+         - "0x09884521c53a4e8687c2d67a4f38e414e08afeb0"
+         - "0x0"
+         - "latest"
       id: 1
   expected:
     respon:

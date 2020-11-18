@@ -1,0 +1,15 @@
+---
+tests:
+- case: 测试eth_accounts接口的正确性
+  http:
+    method: post
+    headers:
+      Content-Type: application/json
+    data:
+      json: 2.0
+      method: eth_accounts
+      params: []
+      id: 67
+  expected:
+    respon:
+      id: 67

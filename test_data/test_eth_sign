@@ -9,8 +9,9 @@ tests:
       json: 2.0
       method: eth_sign
       params:
-         - "0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2"
-         - "0xdeadeaf"
+        // - "0xe0Df5ba2C23B2EdDCaB7DF15255F12474680B8E2"
+
+        - "0xdeadeaf"
       id: 1
   expected:
     respon:
